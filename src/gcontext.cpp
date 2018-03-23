@@ -108,27 +108,33 @@ void GraphicsContext::highGradientLine(int x0, int y0, int x1, int y1){
  */
 void GraphicsContext::drawCircle(int x0, int y0, unsigned int radius)
 {
-	// This is a naive implementation that draws many line
-	// segments.  Also uses floating point math for poor performance
-
-	// also, large circles will be "jagged"
+	int x = radius - 1;
+	int y = 0;
+	int differenceX = 1;
+	int differenceY = 1;
+	int error = differenceX - (radius << 1);
 	
-	// start at 0 degrees
-	int oldx = radius;
-	int oldy = 0;
+	while(x >= y){
+		setPixel(x0 + x, y0 + y);
+		setPixel(x0 + y, y0 + x);
+		setPixel(x0 - y, y0 + x);
+		setPixel(x0 - x, y0 + y);
+		setPixel(x0 - x, y0 - y);
+		setPixel(x0 - y, y0 - x);
+	    setPixel(x0 + y, y0 - x);
+		setPixel(x0 + x, y0 - y);
 
-	// go from 1 to 360 degrees
-	for (int segment =1; segment<=360; segment += 1)
-	{
-		int newx = std::cos(segment*M_PI/180)*radius;
-		int newy = std::sin(segment*M_PI/180)*radius;
+		if(error <= 0){
+			y++;
+			error += differenceY;
+			differenceY += 2;
+		}
 
-		// hit four quadrants
-		drawLine(x0+oldx,y0+oldy,x0+newx,y0+newy);
-		
-		oldx = newx;
-		oldy = newy;
-		
+		if(error > 0){
+			x--;
+			differenceX += 2;
+			error += differenceX - (radius << 1);
+		}
 	}
 	
 	return;	
